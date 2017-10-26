@@ -252,6 +252,11 @@ services:
         options:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
+      logging:
+        driver: "gelf"
+        options:
+          gelf-address: "udp://localhost:12201"
+          tag: "mailcow"
       image: memcached:alpine
       restart: always
       dns:
@@ -356,6 +361,11 @@ services:
         - /lib/modules:/lib/modules:ro
 
     watchdog-mailcow:
+      logging:
+        driver: "gelf"
+        options:
+          gelf-address: "udp://localhost:12201"
+          tag: "mailcow"
       image: mailcow/watchdog:1.8
       build: ./data/Dockerfiles/watchdog
       volumes:
@@ -375,6 +385,11 @@ services:
             - watchdog
 
     dockerapi-mailcow:
+      logging:
+        driver: "gelf"
+        options:
+          gelf-address: "udp://localhost:12201"
+          tag: "mailcow"
       image: mailcow/dockerapi:1.0
       stop_grace_period: 3s
       build: ./data/Dockerfiles/dockerapi
