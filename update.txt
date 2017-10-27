@@ -1,0 +1,3 @@
+grep replace 172.25.... with 172.22....
+run dpkg-reconfigure sendmail
+go over the setup document of mailcow again.

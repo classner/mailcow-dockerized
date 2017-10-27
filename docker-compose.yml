@@ -36,7 +36,7 @@ services:
         timeout: 5s
         retries: 10
       volumes:
-        - ~/.docker-volumes/mailcow/mysql:/var/lib/mysql/
+        - ~/.docker_volumes/mailcow/mysql:/var/lib/mysql/
         - ./data/conf/mysql/:/etc/mysql/conf.d/:ro
       environment:
         - MYSQL_ROOT_PASSWORD=${DBROOT}
@@ -60,7 +60,7 @@ services:
           tag: "mailcow"
       image: redis:alpine
       volumes:
-        - ~/.docker-volumes/mailcow/redis:/data/
+        - ~/.docker_volumes/mailcow/redis:/data/
       restart: always
       dns:
         - 172.25.1.254
@@ -104,8 +104,8 @@ services:
         - ./data/conf/rspamd/override.d/:/etc/rspamd/override.d:ro
         - ./data/conf/rspamd/local.d/:/etc/rspamd/local.d:ro
         - ./data/conf/rspamd/lua/:/etc/rspamd/lua/:ro
-        - ~/.docker-volumes/mailcow/dkim:/data/dkim
-        - ~/.docker-volumes/mailcow/rspamd:/var/lib/rspamd
+        - ~/.docker_volumes/mailcow/dkim:/data/dkim
+        - ~/.docker_volumes/mailcow/rspamd:/var/lib/rspamd
       restart: always
       dns:
         - 172.25.1.254
@@ -130,7 +130,7 @@ services:
       volumes:
         - ./data/web:/web:rw
         - ./data/conf/rspamd/dynmaps:/dynmaps:ro
-        - ~/.docker-volumes/mailcow/dkim:/data/dkim
+        - ~/.docker_volumes/mailcow/dkim:/data/dkim
       environment:
         - DBNAME=${DBNAME}
         - DBUSER=${DBUSER}
@@ -189,8 +189,8 @@ services:
         - ./data/conf/dovecot:/usr/local/etc/dovecot
         - ./data/assets/ssl:/etc/ssl/mail/:ro
         - ./data/conf/sogo/:/etc/sogo/
-        - ~/.docker-volumes/mailcow/vmail:/var/vmail
-        - ~/.docker-volumes/mailcow/crypt:/mail_crypt/
+        - ~/.docker_volumes/mailcow/vmail:/var/vmail
+        - ~/.docker_volumes/mailcow/crypt:/mail_crypt/
       environment:
         - DBNAME=${DBNAME}
         - DBUSER=${DBUSER}
@@ -227,8 +227,8 @@ services:
       volumes:
         - ./data/conf/postfix:/opt/postfix/conf
         - ./data/assets/ssl:/etc/ssl/mail/:ro
-        - ~/.docker-volumes/mailcow/postfix:/var/spool/postfix
-        - ~/.docker-volumes/mailcow/crypt:/var/lib/zeyple
+        - ~/.docker_volumes/mailcow/postfix:/var/spool/postfix
+        - ~/.docker_volumes/mailcow/crypt:/var/lib/zeyple
       environment:
         - DBNAME=${DBNAME}
         - DBUSER=${DBUSER}
@@ -369,7 +369,7 @@ services:
       image: mailcow/watchdog:1.8
       build: ./data/Dockerfiles/watchdog
       volumes:
-        - ~/.docker-volumes/mailcow/vmail:/vmail:ro
+        - ~/.docker_volumes/mailcow/vmail:/vmail:ro
       restart: always
       environment:
         - DBNAME=${DBNAME}
