@@ -18,7 +18,7 @@ services:
       restart: always
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.254
+          ipv4_address: 172.22.1.254
           aliases:
             - unbound
 
@@ -45,10 +45,10 @@ services:
         - MYSQL_PASSWORD=${DBPASS}
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.250
+          ipv4_address: 172.22.1.250
           aliases:
             - mysql
 
@@ -63,10 +63,10 @@ services:
         - ~/.docker_volumes/mailcow/redis:/data/
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.249
+          ipv4_address: 172.22.1.249
           aliases:
             - redis
 
@@ -82,18 +82,13 @@ services:
       environment:
         - SKIP_CLAMD=${SKIP_CLAMD:-n}
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
           aliases:
             - clamd
 
     rspamd-mailcow:
-      logging:
-        driver: "gelf"
-        options:
-          gelf-address: "udp://localhost:12201"
-          tag: "mailcow"
       image: mailcow/rspamd:1.12
       build: ./data/Dockerfiles/rspamd
       stop_grace_period: 30s
@@ -108,11 +103,11 @@ services:
         - ~/.docker_volumes/mailcow/rspamd:/var/lib/rspamd
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       hostname: rspamd
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.253
+          ipv4_address: 172.22.1.253
           aliases:
             - rspamd
 
@@ -146,7 +141,7 @@ services:
         - SMTP_PORT=${SMTP_PORT:-25}
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
           aliases:
@@ -170,10 +165,10 @@ services:
         - ./data/conf/sogo/:/etc/sogo/
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.252
+          ipv4_address: 172.22.1.252
           aliases:
             - sogo
 
@@ -209,7 +204,7 @@ services:
           soft: 20000
           hard: 40000
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       hostname: ${MAILCOW_HOSTNAME}
       networks:
         mailcow-network:
@@ -239,7 +234,7 @@ services:
         - "${SUBMISSION_PORT:-587}:587"
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       hostname: ${MAILCOW_HOSTNAME}
       networks:
         mailcow-network:
@@ -260,7 +255,7 @@ services:
       image: memcached:alpine
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
           aliases:
@@ -296,10 +291,10 @@ services:
         - "${HTTP_BIND:-0.0.0.0}:${HTTP_PORT:-80}:${HTTP_PORT:-80}"
       restart: always
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.251
+          ipv4_address: 172.22.1.251
           aliases:
             - nginx
 
@@ -315,7 +310,7 @@ services:
       image: mailcow/acme:1.22
       build: ./data/Dockerfiles/acme
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       environment:
         - ADDITIONAL_SAN=${ADDITIONAL_SAN}
         - MAILCOW_HOSTNAME=${MAILCOW_HOSTNAME}
@@ -356,7 +351,7 @@ services:
         - SKIP_FAIL2BAN=${SKIP_FAIL2BAN:-n}
       network_mode: "host"
       dns:
-        - 172.25.1.254
+        - 172.22.1.254
       volumes:
         - /lib/modules:/lib/modules:ro
 
@@ -380,7 +375,7 @@ services:
         - MAILCOW_HOSTNAME=${MAILCOW_HOSTNAME}
       networks:
         mailcow-network:
-          ipv4_address: 172.25.1.248
+          ipv4_address: 172.22.1.248
           aliases:
             - watchdog
 
@@ -421,5 +416,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.25.1.0/24
+        - subnet: 172.22.1.0/24
         - subnet: fd4d:6169:6c63:6f77::/64
