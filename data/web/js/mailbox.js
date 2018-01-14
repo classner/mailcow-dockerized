@@ -40,10 +40,78 @@ $(document).ready(function() {
   });
 
   // Log modal
-  $('#logModal').on('show.bs.modal', function(e) {
-    var logText = $(e.relatedTarget).data('log-text');
-    $(e.currentTarget).find('#logText').html('<pre style="background:none;font-size:11px;line-height:1.1;border:0px">' + logText + '</pre>');
+  $('#syncjobLogModal').on('show.bs.modal', function(e) {
+    var syncjob_id = $(e.relatedTarget).data('syncjob-id');
+    $.ajax({
+      url: '/inc/ajax/syncjob_logs.php',
+      data: { id: syncjob_id },
+      dataType: 'text',
+      success: function(data){
+        $(e.currentTarget).find('#logText').text(data);
+      },
+      error: function(xhr, status, error) {
+        $(e.currentTarget).find('#logText').text(xhr.responseText);
+      }
+    });
   });
+
+  // Log modal
+  $('#dnsInfoModal').on('show.bs.modal', function(e) {
+    var domain = $(e.relatedTarget).data('domain');
+    $('.dns-modal-body').html('<center><span style="font-size:18pt;margin:50px" class="glyphicon glyphicon-refresh glyphicon-spin"></span></center>');
+    $.ajax({
+      url: '/inc/ajax/dns_diagnostics.php',
+      data: { domain: domain },
+      dataType: 'text',
+      success: function(data){
+        $('.dns-modal-body').html(data);
+      },
+      error: function(xhr, status, error) {
+        $('.dns-modal-body').html(xhr.responseText);
+      }
+    });
+  });
+
+  // Sieve data modal
+  $('#sieveDataModal').on('show.bs.modal', function(e) {
+    var sieveScript = $(e.relatedTarget).data('sieve-script');
+    $(e.currentTarget).find('#sieveDataText').html('<pre style="font-size:14px;line-height:1.1">' + sieveScript + '</pre>');
+  });
+
+  // Set line numbers for textarea
+  $("#script_data").numberedtextarea({allowTabChar: true});
+  // Disable submit button on script change
+	$('#script_data').on('keyup', function() {
+    $('#add_filter_btns > #add_item').attr({"disabled": true});
+    $('#validation_msg').html('-');
+	});
+
+  // Validate script data
+  $("#validate_sieve").click(function( event ) {
+    event.preventDefault();
+    var script = $('#script_data').val();
+    $.ajax({
+      dataType: 'jsonp',
+      url: "/inc/ajax/sieve_validation.php",
+      type: "get",
+      data: { script: script },
+      complete: function(data) {
+        var response = (data.responseText);
+        response_obj = JSON.parse(response);
+        if (response_obj.type == "success") {
+          $('#add_filter_btns > #add_item').attr({"disabled": false});
+        }
+        mailcow_alert_box(response_obj.msg, response_obj.type);
+      },
+    });
+  });
+  // $(document).on('DOMNodeInserted', '#prefilter_table', function () {
+    // $("#active-script").closest('td').css('background-color','#b0f0a0');
+    // $("#inactive-script").closest('td').css('background-color','#b0f0a0');
+  // });
+
+
+
 });
 jQuery(function($){
   // http://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery
@@ -87,7 +155,7 @@ jQuery(function($){
   function draw_domain_table() {
     ft_domain_table = FooTable.init('#domain_table', {
       "columns": [
-        {"name":"chkbox","title":"","style":{"maxWidth":"40px","width":"40px"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px"},"filterable": false,"sortable": false,"type":"html"},
         {"sorted": true,"name":"domain_name","title":lang.domain,"style":{"width":"250px"}},
         {"name":"aliases","title":lang.aliases,"breakpoints":"xs sm"},
         {"name":"mailboxes","title":lang.mailboxes},
@@ -103,7 +171,7 @@ jQuery(function($){
         {"name":"max_quota_for_mbox","title":lang.mailbox_quota,"breakpoints":"xs sm"},
         {"name":"backupmx","filterable": false,"style":{"maxWidth":"120px","width":"120px"},"title":lang.backup_mx,"breakpoints":"xs sm"},
         {"name":"active","filterable": false,"style":{"maxWidth":"80px","width":"80px"},"title":lang.active},
-        {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"180px","width":"180px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
+        {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"240px","width":"240px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
       ],
       "rows": $.ajax({
         dataType: 'json',
@@ -119,17 +187,15 @@ jQuery(function($){
             item.quota = item.quota_used_in_domain + "/" + item.max_quota_for_domain;
             item.max_quota_for_mbox = humanFileSize(item.max_quota_for_mbox);
             item.chkbox = '<input type="checkbox" data-id="domain" name="multi_select" value="' + item.domain_name + '" />';
+            item.action = '<div class="btn-group">';
             if (role == "admin") {
-              item.action = '<div class="btn-group">' +
-                '<a href="/edit.php?domain=' + encodeURI(item.domain_name) + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
-                '<a href="#" id="delete_selected" data-id="single-domain" data-api-url="delete/domain" data-item="' + encodeURI(item.domain_name) + '" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-trash"></span> ' + lang.remove + '</a>' +
-                '</div>';
+              item.action += '<a href="/edit.php?domain=' + encodeURI(item.domain_name) + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
+                '<a href="#" id="delete_selected" data-id="single-domain" data-api-url="delete/domain" data-item="' + encodeURI(item.domain_name) + '" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-trash"></span> ' + lang.remove + '</a>';
             }
             else {
-              item.action = '<div class="btn-group">' +
-                '<a href="/edit.php?domain=' + encodeURI(item.domain_name) + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
-                '</div>';
+              item.action += '<a href="/edit.php?domain=' + encodeURI(item.domain_name) + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>';
             }
+            item.action += '<a href="#dnsInfoModal" class="btn btn-xs btn-info" data-toggle="modal" data-domain="' + encodeURI(item.domain_name) + '"><span class="glyphicon glyphicon-question-sign"></span> DNS</a></div>';
           });
         }
       }),
@@ -142,6 +208,7 @@ jQuery(function($){
       "filtering": {
         "enabled": true,
         "position": "left",
+        "connectors": false,
         "placeholder": lang.filter_table
       },
       "sorting": {
@@ -152,7 +219,7 @@ jQuery(function($){
   function draw_mailbox_table() {
     ft_mailbox_table = FooTable.init('#mailbox_table', {
       "columns": [
-        {"name":"chkbox","title":"","style":{"maxWidth":"40px","width":"40px"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px"},"filterable": false,"sortable": false,"type":"html"},
         {"sorted": true,"name":"username","style":{"word-break":"break-all","min-width":"120px"},"title":lang.username},
         {"name":"name","title":lang.fname,"style":{"word-break":"break-all","min-width":"120px"},"breakpoints":"xs sm"},
         {"name":"domain","title":lang.domain,"breakpoints":"xs sm"},
@@ -212,6 +279,7 @@ jQuery(function($){
       "filtering": {
         "enabled": true,
         "position": "left",
+        "connectors": false,
         "placeholder": lang.filter_table
       },
       "sorting": {
@@ -222,7 +290,7 @@ jQuery(function($){
   function draw_resource_table() {
     ft_resource_table = FooTable.init('#resource_table', {
       "columns": [
-        {"name":"chkbox","title":"","style":{"maxWidth":"40px","width":"40px"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px"},"filterable": false,"sortable": false,"type":"html"},
         {"sorted": true,"name":"description","title":lang.description,"style":{"width":"250px"}},
         {"name":"kind","title":lang.kind},
         {"name":"domain","title":lang.domain,"breakpoints":"xs sm"},
@@ -256,6 +324,7 @@ jQuery(function($){
       "filtering": {
         "enabled": true,
         "position": "left",
+        "connectors": false,
         "placeholder": lang.filter_table
       },
       "sorting": {
@@ -263,11 +332,61 @@ jQuery(function($){
       }
     });
   }
-
+  function draw_bcc_table() {
+    ft_bcc_table = FooTable.init('#bcc_table', {
+      "columns": [
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px"},"filterable": false,"sortable": false,"type":"html"},
+        {"sorted": true,"name":"id","title":"ID","style":{"maxWidth":"60px","width":"60px","text-align":"center"}},
+        {"name":"type","title":lang.bcc_type},
+        {"name":"local_dest","title":lang.bcc_local_dest},
+        {"name":"bcc_dest","title":lang.bcc_destinations},
+        {"name":"domain","title":lang.domain,"breakpoints":"xs sm"},
+        {"name":"active","filterable": false,"style":{"maxWidth":"80px","width":"80px"},"title":lang.active},
+        {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"180px","width":"180px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
+      ],
+      "empty": lang.empty,
+      "rows": $.ajax({
+        dataType: 'json',
+        url: '/api/v1/get/bcc/all',
+        jsonp: false,
+        error: function () {
+          console.log('Cannot draw bcc table');
+        },
+        success: function (data) {
+          $.each(data, function (i, item) {
+            item.action = '<div class="btn-group">' +
+              '<a href="/edit.php?bcc=' + item.id + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
+              '<a href="#" id="delete_selected" data-id="single-bcc" data-api-url="delete/bcc" data-item="' + item.id + '" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-trash"></span> ' + lang.remove + '</a>' +
+              '</div>';
+            item.chkbox = '<input type="checkbox" data-id="bcc" name="multi_select" value="' + item.id + '" />';
+            if (item.type == 'sender') {
+              item.type = '<span id="active-script" class="label label-success">Sender</span>';
+            } else {
+              item.type = '<span id="inactive-script" class="label label-warning">Recipient</span>';
+            }
+          });
+        }
+      }),
+      "paging": {
+        "enabled": true,
+        "limit": 5,
+        "size": pagination_size
+      },
+      "filtering": {
+        "enabled": true,
+        "position": "left",
+        "connectors": false,
+        "placeholder": lang.filter_table
+      },
+      "sorting": {
+        "enabled": true
+      }
+    });
+  }
   function draw_alias_table() {
     ft_alias_table = FooTable.init('#alias_table', {
       "columns": [
-        {"name":"chkbox","title":"","style":{"maxWidth":"40px","width":"40px"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px"},"filterable": false,"sortable": false,"type":"html"},
         {"sorted": true,"name":"address","title":lang.alias,"style":{"width":"250px"}},
         {"name":"goto","title":lang.target_address},
         {"name":"domain","title":lang.domain,"breakpoints":"xs sm"},
@@ -309,6 +428,7 @@ jQuery(function($){
       "filtering": {
         "enabled": true,
         "position": "left",
+        "connectors": false,
         "placeholder": lang.filter_table
       },
       "sorting": {
@@ -320,11 +440,11 @@ jQuery(function($){
   function draw_aliasdomain_table() {
     ft_aliasdomain_table = FooTable.init('#aliasdomain_table', {
       "columns": [
-        {"name":"chkbox","title":"","style":{"maxWidth":"40px","width":"40px"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px"},"filterable": false,"sortable": false,"type":"html"},
         {"sorted": true,"name":"alias_domain","title":lang.alias,"style":{"width":"250px"}},
         {"name":"target_domain","title":lang.target_domain},
         {"name":"active","filterable": false,"style":{"maxWidth":"50px","width":"70px"},"title":lang.active},
-        {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"180px","width":"180px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
+        {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"250px","width":"250px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
       ],
       "empty": lang.empty,
       "rows": $.ajax({
@@ -339,6 +459,7 @@ jQuery(function($){
             item.action = '<div class="btn-group">' +
               '<a href="/edit.php?aliasdomain=' + encodeURI(item.alias_domain) + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
               '<a href="#" id="delete_selected" data-id="single-alias-domain" data-api-url="delete/alias-domain" data-item="' + encodeURI(item.alias_domain) + '" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-trash"></span> ' + lang.remove + '</a>' +
+              '<a href="#dnsInfoModal" class="btn btn-xs btn-info" data-toggle="modal" data-domain="' + encodeURI(item.alias_domain) + '"><span class="glyphicon glyphicon-question-sign"></span> DNS</a></div>' +
               '</div>';
             item.chkbox = '<input type="checkbox" data-id="alias-domain" name="multi_select" value="' + item.alias_domain + '" />';
           });
@@ -352,6 +473,7 @@ jQuery(function($){
       "filtering": {
         "enabled": true,
         "position": "left",
+        "connectors": false,
         "placeholder": lang.filter_table
       },
       "sorting": {
@@ -363,34 +485,48 @@ jQuery(function($){
   function draw_sync_job_table() {
     ft_syncjob_table = FooTable.init('#sync_job_table', {
       "columns": [
-        {"name":"chkbox","title":"","style":{"maxWidth":"40px","width":"40px","text-align":"center"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px","text-align":"center"},"filterable": false,"sortable": false,"type":"html"},
         {"sorted": true,"name":"id","title":"ID","style":{"maxWidth":"60px","width":"60px","text-align":"center"}},
         {"name":"user2","title":lang.owner},
         {"name":"server_w_port","title":"Server","breakpoints":"xs"},
+        {"name":"exclude","title":lang.excludes,"breakpoints":"all"},
         {"name":"mins_interval","title":lang.mins_interval,"breakpoints":"all"},
         {"name":"last_run","title":lang.last_run,"breakpoints":"all"},
         {"name":"log","title":"Log"},
-        {"name":"active","filterable": false,"style":{"maxWidth":"50px","width":"70px"},"title":lang.active},
+        {"name":"active","filterable": false,"style":{"maxWidth":"70px","width":"70px"},"title":lang.active},
+        {"name":"is_running","filterable": false,"style":{"maxWidth":"120px","width":"100px"},"title":lang.status},
         {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"180px","width":"180px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
       ],
       "empty": lang.empty,
       "rows": $.ajax({
         dataType: 'json',
-        url: '/api/v1/get/syncjobs/all',
+        url: '/api/v1/get/syncjobs/all/no_log',
         jsonp: false,
         error: function () {
           console.log('Cannot draw sync job table');
         },
         success: function (data) {
           $.each(data, function (i, item) {
-            item.log = '<a href="#logModal" data-toggle="modal" data-log-text="' + escapeHtml(item.returned_text) + '">Open logs</a>'
-            item.exclude = '<code>' + item.exclude + '</code>'
+            item.log = '<a href="#syncjobLogModal" data-toggle="modal" data-syncjob-id="' + encodeURI(item.id) + '">Open logs</a>'
+            if (!item.exclude > 0) {
+              item.exclude = '-';
+            } else {
+              item.exclude  = '<code>' + item.exclude + '</code>';
+            }
             item.server_w_port = item.user1 + '@' + item.host1 + ':' + item.port1;
             item.action = '<div class="btn-group">' +
               '<a href="/edit.php?syncjob=' + item.id + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
               '<a href="#" id="delete_selected" data-id="single-syncjob" data-api-url="delete/syncjob" data-item="' + encodeURI(item.id) + '" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-trash"></span> ' + lang.remove + '</a>' +
               '</div>';
             item.chkbox = '<input type="checkbox" data-id="syncjob" name="multi_select" value="' + item.id + '" />';
+            if (item.is_running == 1) {
+              item.is_running = '<span id="active-script" class="label label-success">' + lang.running + '</span>';
+            } else {
+              item.is_running = '<span id="inactive-script" class="label label-warning">' + lang.waiting + '</span>';
+            }
+            if (!item.last_run > 0) {
+              item.last_run = lang.waiting;
+            }
           });
         }
       }),
@@ -399,11 +535,71 @@ jQuery(function($){
         "limit": 5,
         "size": pagination_size
       },
+      "filtering": {
+        "enabled": true,
+        "position": "left",
+        "connectors": false,
+        "placeholder": lang.filter_table
+      },
       "sorting": {
         "enabled": true
       }
     });
   }
+
+  function draw_filter_table() {
+    ft_filter_table = FooTable.init('#filter_table', {
+      "columns": [
+        {"name":"chkbox","title":"","style":{"maxWidth":"60px","width":"60px","text-align":"center"},"filterable": false,"sortable": false,"type":"html"},
+        {"name":"id","title":"ID","style":{"maxWidth":"60px","width":"60px","text-align":"center"}},
+        {"name":"active","style":{"maxWidth":"80px","width":"80px"},"title":lang.active},
+        {"name":"filter_type","style":{"maxWidth":"80px","width":"80px"},"title":"Type"},
+        {"sorted": true,"name":"username","title":lang.owner,"style":{"maxWidth":"550px","width":"350px"}},
+        {"name":"script_desc","title":lang.description,"breakpoints":"xs"},
+        {"name":"script_data","title":"Script","breakpoints":"all"},
+        {"name":"action","filterable": false,"sortable": false,"style":{"text-align":"right","maxWidth":"180px","width":"180px"},"type":"html","title":lang.action,"breakpoints":"xs sm"}
+      ],
+      "empty": lang.empty,
+      "rows": $.ajax({
+        dataType: 'json',
+        url: '/api/v1/get/filters/all',
+        jsonp: false,
+        error: function () {
+          console.log('Cannot draw filter table');
+        },
+        success: function (data) {
+          $.each(data, function (i, item) {
+            if (item.active_int == 1) {
+              item.active = '<span id="active-script" class="label label-success">' + lang.active + '</span>';
+            } else {
+              item.active = '<span id="inactive-script" class="label label-warning">' + lang.inactive + '</span>';
+            }
+            item.script_data = '<pre style="margin:0px">' + escapeHtml(item.script_data) + '</pre>'
+            item.filter_type = '<div class="label label-default">' + item.filter_type.charAt(0).toUpperCase() + item.filter_type.slice(1).toLowerCase() + '</div>'
+            item.action = '<div class="btn-group">' +
+              '<a href="/edit.php?filter=' + item.id + '" class="btn btn-xs btn-default"><span class="glyphicon glyphicon-pencil"></span> ' + lang.edit + '</a>' +
+              '<a href="#" id="delete_selected" data-id="single-filter" data-api-url="delete/filter" data-item="' + encodeURI(item.id) + '" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-trash"></span> ' + lang.remove + '</a>' +
+              '</div>';
+            item.chkbox = '<input type="checkbox" data-id="filter_item" name="multi_select" value="' + item.id + '" />'
+          });
+        }
+      }),
+      "paging": {
+        "enabled": true,
+        "limit": 5,
+        "size": pagination_size
+      },
+      "filtering": {
+        "enabled": true,
+        "position": "left",
+        "connectors": false,
+        "placeholder": lang.filter_table
+      },
+      "sorting": {
+        "enabled": true
+      }
+    });
+  };
 
   draw_domain_table();
   draw_mailbox_table();
@@ -411,4 +607,7 @@ jQuery(function($){
   draw_alias_table();
   draw_aliasdomain_table();
   draw_sync_job_table();
+  draw_filter_table();
+  draw_bcc_table();
+
 });

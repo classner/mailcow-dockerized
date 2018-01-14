@@ -5,9 +5,9 @@
 
 $lang['footer']['loading'] = 'Einen Moment bitte...';
 $lang['header']['restart_sogo'] = 'SOGo neustarten';
-$lang['footer']['restart_sogo'] = 'SOGo neustarten';
+$lang['footer']['restart_container'] = 'Container neustarten';
 $lang['footer']['restart_now'] = 'Jetzt neustarten';
-$lang['footer']['restart_sogo_info'] = 'Einige Änderungen an Domains benötigen einen Neustart SOGos. Hier können Sie SOGo neustarten.<br><br><b>Wichtig:</b> Ein korrekter Neustart SOGos kann eine Weile in Anspruch nehmen, bitte warten Sie, bis der Prozess vollständig beendet wurde.';
+$lang['footer']['restart_container_info'] = '<b>Wichtig:</b> Ein korrekter Neustart eines Containers kann eine Weile in Anspruch nehmen, bitte warten Sie, bis der Prozess vollständig beendet wurde.';
 
 $lang['footer']['confirm_delete'] = 'Löschen bestätigen';
 $lang['footer']['delete_these_items'] = 'Sind Sie sicher, dass die Änderungen an Elementen mit folgender ID durchgeführt werden sollen?';
@@ -73,7 +73,7 @@ $lang['danger']['resource_invalid'] = 'Ressourcenname ist ungültig';
 $lang['danger']['description_invalid'] = 'Ressourcenbeschreibung ist ungültig';
 $lang['danger']['mailbox_invalid_suggest'] = 'Mailboxname ist ungültig, meinten Sie vielleicht %s?';
 $lang['danger']['is_alias'] = '%s lautet bereits eine Alias-Adresse';
-$lang['danger']['is_alias_or_mailbox'] = "Eine Mailbox oder ein Alias mit der Adresse %s ist bereits vorhanden";
+$lang['danger']['is_alias_or_mailbox'] = "Eine Mailbox, ein Alias oder eine sich aus einer Alias-Domain ergebende Adresse mit dem Namen %s ist bereits vorhanden";
 $lang['danger']['is_spam_alias'] = '%s lautet bereits eine Spam-Alias-Adresse';
 $lang['danger']['quota_not_0_not_numeric'] = 'Speicherplatz muss numerisch und >= 0 sein';
 $lang['danger']['domain_not_found'] = 'Domain %s nicht gefunden';
@@ -99,6 +99,9 @@ $lang['danger']['domain_not_empty'] = 'Kann nur leere Domains entfernen';
 $lang['warning']['spam_alias_temp_error'] = 'Kann zur Zeit keinen Spam-Alias erstellen, bitte versuchen Sie es später noch einmal.';
 $lang['danger']['spam_alias_max_exceeded'] = 'Maximale Anzahl an Spam-Alias-Adressen erreicht';
 $lang['danger']['validity_missing'] = 'Bitte geben Sie eine Gültigkeitsdauer an';
+$lang['user']['loading'] = "Lade...";
+$lang['user']['active_sieve'] = "Aktiver Filter";
+$lang['user']['no_active_filter'] = "Kein aktiver Filter vorhanden";
 $lang['user']['on'] = 'Ein';
 $lang['user']['off'] = 'Aus';
 $lang['user']['messages'] = "Nachrichten";
@@ -118,6 +121,8 @@ $lang['user']['did_you_know'] = '<b>Wussten Sie schon?</b> Sie können Ihre E-Ma
 $lang['user']['spam_aliases'] = 'Temporäre E-Mail Aliasse';
 $lang['user']['alias'] = 'Alias';
 $lang['user']['aliases'] = 'Aliasse';
+$lang['user']['shared_aliases'] = 'Geteilte Alias-Adressen';
+$lang['user']['direct_aliases'] = 'Direkte Alias-Adressen';
 $lang['user']['domain_aliases'] = 'Domain-Alias Adressen';
 $lang['user']['is_catch_all'] = 'Ist Catch-All Adresse für Domain(s)';
 $lang['user']['aliases_also_send_as'] = 'Darf außerdem versenden als Benutzer';
@@ -155,6 +160,9 @@ $lang['user']['spamfilter_red'] = 'Rot: Die Nachricht ist eindeutig Spam und wir
 $lang['user']['spamfilter_default_score'] = 'Standardwert:';
 $lang['user']['spamfilter_hint'] = 'Der erste Wert beschreibt den "low spam score", der zweite Wert den "high spam score".';
 $lang['user']['spamfilter_table_domain_policy'] = "n.v. (Domainrichtlinie)";
+$lang['user']['waiting'] = "Warte auf Ausführung";
+$lang['user']['status'] = "Status";
+$lang['user']['running'] = "Wird ausgeführt";
 
 $lang['user']['tls_policy_warning'] = '<strong>Vorsicht:</strong> Entscheiden Sie sich unverschlüsselte Verbindungen abzulehnen, kann dies dazu führen, dass Kontakte Sie nicht mehr erreichen.<br>Nachrichten, die die Richtlinie nicht erfüllen, werden durch einen Hard-Fail im Mailsystem abgewiesen.<br>Diese Einstellung ist aktiv für die primäre Mailbox, für alle Alias-Adressen, die dieser Mailbox <b>direkt zugeordnet</b> sind (lediglich eine einzige Ziel-Adresse) und der Adressen, die sich aus Alias-Domains ergeben. Ausgeschlossen sind temporäre Aliasse ("Spam-Alias-Adressen"), Catch-All Alias-Adressen sowie Alias-Adressen mit mehreren Zielen.';
 $lang['user']['tls_policy'] = 'Verschlüsselungsrichtlinie';
@@ -215,6 +223,7 @@ $lang['header']['mailcow_settings'] = 'Konfiguration';
 $lang['header']['administration'] = 'Administration';
 $lang['header']['mailboxes'] = 'Mailboxen';
 $lang['header']['user_settings'] = 'Benutzereinstellungen';
+$lang['header']['diagnostics'] = 'Diagnose';
 $lang['header']['login'] = 'Anmeldung';
 $lang['header']['logged_in_as_logout'] = 'Eingeloggt als <b>%s</b> (abmelden)';
 $lang['header']['logged_in_as_logout_dual'] = 'Eingeloggt als <b>%s <span class="text-info">[%s]</span></b>';
@@ -241,7 +250,7 @@ $lang['mailbox']['target_domain'] = 'Ziel-Domain';
 $lang['mailbox']['target_address'] = 'Ziel-Adresse';
 $lang['mailbox']['username'] = 'Benutzername';
 $lang['mailbox']['fname'] = 'Name';
-$lang['mailbox']['filter_table'] = 'Tabelle filtern';
+$lang['mailbox']['filter_table'] = 'Filtern';
 $lang['mailbox']['yes'] = '&#10004;';
 $lang['mailbox']['no'] = '&#10008;';
 $lang['mailbox']['quota'] = 'Speicherplatz';
@@ -265,6 +274,10 @@ $lang['mailbox']['deactivate'] = 'Deaktivieren';
 $lang['mailbox']['owner'] = 'Besitzer';
 $lang['mailbox']['mins_interval'] = 'Intervall (min)';
 $lang['mailbox']['last_run'] = 'Letzte Ausführung';
+$lang['mailbox']['last_run_reset'] = 'Als nächstes ausführen';
+$lang['mailbox']['sieve_info'] = 'Es können mehrere Filter pro Benutzer existieren, aber nur ein Filter eines Typs (Pre-/Postfilter) kann gleichzeitig aktiv sein.<br>
+Die Ausführung erfolgt in nachstehender Reihenfolge. Ein fehlgeschlagenes Script sowie der Befehl "keep;" stoppen die weitere Verarbeitung <b>nicht</b>.<br>
+Prefilter → User scripts → Postfilter → <a href="https://github.com/mailcow/mailcow-dockerized/blob/master/data/conf/dovecot/sieve_after" target="_blank">global sieve postfilter</a>';
 
 $lang['info']['no_action'] = 'Keine Aktion anwendbar';
 $lang['delete']['title'] = 'Objekt entfernen';
@@ -287,7 +300,7 @@ $lang['edit']['syncjob'] = 'Sync-Job bearbeiten';
 $lang['edit']['save'] = 'Änderungen speichern';
 $lang['edit']['username'] = 'Benutzername';
 $lang['edit']['hostname'] = 'Servername';
-$lang['edit']['encryption'] = 'Verschlüsselungsmethode';
+$lang['edit']['encryption'] = 'Verschlüsselung';
 $lang['edit']['maxage'] = 'Maximales Alter in Tagen einer Nachricht, die kopiert werden soll</br ><small>(0 = alle Nachrichten kopieren)</small>';
 $lang['edit']['subfolder2'] = 'Ziel-Ordner<br><small>(leer = kein Unterordner)</small>';
 $lang['edit']['mins_interval'] = 'Intervall (min)';
@@ -339,7 +352,7 @@ $lang['add']['syncjob_hint'] = 'Passwörter werden unverschlüsselt abgelegt!';
 $lang['add']['hostname'] = 'Servername';
 $lang['add']['port'] = 'Port';
 $lang['add']['username'] = 'Benutzername';
-$lang['add']['enc_method'] = 'Verschlüsselungsmethode';
+$lang['add']['enc_method'] = 'Verschlüsselung';
 $lang['add']['maxage'] = 'Maximales Alter von Nachrichten, welche vom Remote abgefragt werden (0 = Alter ignorieren)';
 $lang['add']['subfolder2'] = 'Synchronisation in Unterordner am Ziel';
 $lang['add']['mins_interval'] = 'Abrufintervall (Minuten)';
@@ -388,6 +401,21 @@ $lang['add']['password_repeat'] = 'Passwort (Wiederholung)';
 $lang['add']['previous'] = 'Vorherige Seite';
 $lang['add']['restart_sogo_hint'] = 'Der SOGo Container muss nach dem Hinzufügen einer neuen Domain neugestartet werden!';
 $lang['add']['goto_null'] = 'Nachrichten sofort verwerfen';
+$lang['add']['validation_success'] = 'Erfolgreich validiert';
+$lang['add']['activate_filter_warn'] = 'Alle anderen Filter diesen Typs werden deaktiviert, falls dieses Script aktiv markiert wird.';
+$lang['add']['validate'] = 'Validieren';
+$lang['mailbox']['add_filter'] = 'Filter erstellen';
+$lang['add']['sieve_desc'] = 'Kurze Beschreibung';
+$lang['edit']['sieve_desc'] = 'Kurze Beschreibung';
+$lang['add']['sieve_type'] = 'Filtertyp';
+$lang['edit']['sieve_type'] = 'Filtertyp';
+$lang['mailbox']['set_prefilter'] = 'Als Prefilter markieren';
+$lang['mailbox']['set_postfilter'] = 'Als Postfilter markieren';
+$lang['mailbox']['filters'] = 'Filter';
+$lang['mailbox']['sync_jobs'] = 'Synchronisationen';
+$lang['mailbox']['inactive'] = 'Inaktiv';
+$lang['edit']['validate_save'] = 'Validieren und speichern';
+
 
 $lang['login']['title'] = 'Anmeldung';
 $lang['login']['administration'] = 'Administration';
@@ -425,6 +453,8 @@ $lang['tfa']['scan_qr_code'] = "Bitte scannen Sie jetzt den angezeigten QR-Code:
 $lang['tfa']['enter_qr_code'] = "Falls Sie den angezeigten QR-Code nicht scannen können, verwenden Sie bitte nachstehenden Sicherheitsschlüssel";
 $lang['tfa']['confirm_totp_token'] = "Bitte bestätigen Sie die Änderung durch Eingabe eines generierten Tokens";
 
+$lang['admin']['no_new_rows'] = 'Keine weiteren Zeilen vorhanden';
+$lang['admin']['additional_rows'] = ' zusätzliche Zeilen geladen'; // parses to 'n additional rows were added'
 $lang['admin']['private_key'] = 'Private Key';
 $lang['admin']['import'] = 'Importieren';
 $lang['admin']['import_private_key'] = 'Private Key importieren';
@@ -463,6 +493,8 @@ $lang['admin']['dkim_key_unused'] = 'Key ohne Zuweisung';
 $lang['admin']['dkim_key_missing'] = 'Key fehlt';
 $lang['admin']['dkim_key_hint'] = 'Der Selector für DKIM-Keys lautet immer <code>dkim</code>.';
 $lang['admin']['add'] = 'Hinzufügen';
+$lang['add']['add_domain_restart'] = 'Domain hinzufügen und SOGo neustarten';
+$lang['add']['add_domain_only'] = 'Nur Domain hinzufügen';
 $lang['admin']['configuration'] = 'Konfiguration';
 $lang['admin']['password'] = 'Passwort';
 $lang['admin']['password_repeat'] = 'Passwort (Wiederholung)';
@@ -505,11 +537,23 @@ $lang['admin']['host'] = 'Host';
 $lang['admin']['source'] = 'Quelle';
 $lang['admin']['add_forwarding_host'] = 'Weiterleitungs-Host hinzufügen';
 $lang['admin']['add_relayhost'] = 'Relayhost hinzufügen';
+$lang['admin']['api_allow_from'] = "IP-Adressen für Zugriff";
+$lang['admin']['api_key'] = "API-Key";
+$lang['admin']['activate_api'] = "API aktivieren";
+$lang['admin']['regen_api_key'] = "API-Key regenerieren";
 $lang['delete']['remove_forwardinghost_warning'] = '<b>Warnung:</b> Sie entfernen den Weiterleitungs-Host <b>%s</b>!';
 $lang['success']['forwarding_host_removed'] = "Weiterleitungs-Host %s wurde entfernt";
 $lang['success']['forwarding_host_added'] = "Weiterleitungs-Host %s wurde hinzugefügt";
 $lang['success']['relayhost_removed'] = "Relayhost %s wurde entfernt";
 $lang['success']['relayhost_added'] = "Relayhost %s wurde hinzugefügt";
+$lang['diagnostics']['dns_records'] = 'DNS-Einträge';
+$lang['diagnostics']['dns_records_24hours'] = 'Bitte beachten Sie, dass es bis zu 24 Stunden dauern kann, bis Änderungen an Ihren DNS-Einträgen als aktueller Status auf dieser Seite dargestellt werden. Diese Seite ist nur als Hilfsmittel gedacht, um die korrekten Werte für DNS-Einträge zu anzuzeigen und zu überprüfen, ob die Daten im DNS hinterlegt sind.';
+$lang['diagnostics']['dns_records_name'] = 'Name';
+$lang['diagnostics']['dns_records_type'] = 'Typ';
+$lang['diagnostics']['dns_records_data'] = 'Korrekte Daten';
+$lang['diagnostics']['dns_records_status'] = 'Aktueller Status';
+$lang['diagnostics']['optional'] = 'Dieser Eintrag ist optional.';
+$lang['diagnostics']['cname_from_a'] = 'Wert abgeleitet von A/AAAA Eintrag. Wird unterstützt, sofern der Eintrag auf die korrekte Ressource zeigt.';
 $lang['admin']['relay_from'] = "Absenderadresse";
 $lang['admin']['relay_run'] = "Test durchführen";
 $lang['admin']['customize'] = "Anpassung";
@@ -523,3 +567,83 @@ $lang['admin']['remove_row'] = "Zeile entfernen";
 $lang['admin']['add_row'] = "Zeile hinzufügen";
 $lang['admin']['reset_default'] = "Auf Standard zurücksetzen";
 $lang['admin']['merged_vars_hint'] = 'Ausgegraute Zeilen wurden aus der Datei <code>vars.inc.(local.)php</code> gelesen und können nicht mittels UI verändert werden.';
+$lang['mailbox']['waiting'] = "Wartend";
+$lang['mailbox']['status'] = "Status";
+$lang['mailbox']['running'] = "In Ausführung";
+
+$lang['admin']['ui_texts'] = "UI Label und Texte";
+$lang['admin']['help_text'] = "Hilfstext unter Login-Maske (HTML zulässig)";
+$lang['admin']['main_name'] = '"mailcow UI" Name';
+$lang['admin']['apps_name'] = '"mailcow Apps" Name';
+
+$lang['admin']['customize'] = "UI Anpassung";
+$lang['admin']['change_logo'] = "Logo ändern";
+$lang['admin']['logo_info'] = "Die hochgeladene Grafik wird für die Navigationsleiste auf eine Höhe von 40px skaliert. Für die Darstellung auf der Login-Maske beträgt die skalierte Breite maximal 250px. Eine frei skalierbare Grafik (etwa SVG) wird empfohlen.";
+$lang['admin']['upload'] = "Hochladen";
+$lang['admin']['app_links'] = "App Links";
+$lang['admin']['app_name'] = "App Name";
+$lang['admin']['link'] = "Link";
+$lang['admin']['remove_row'] = "Entfernen";
+$lang['admin']['add_row'] = "Reihe hinzufügen";
+$lang['admin']['reset_default'] = "Zurücksetzen auf Standard";
+$lang['admin']['merged_vars_hint'] = 'Ausgegraute Reihen wurden aus der Datei <code>vars.inc.(local.)php</code> gelesen und können hier nicht verändert werden.';
+
+$lang['edit']['tls_policy'] = "TLS Policy ändern";
+$lang['edit']['spam_score'] = "Einen benutzerdefiniterten Spam-Score festlegen";
+$lang['edit']['spam_policy'] = "Hinzufügen und Entfernen von Einträgen in White- und Blacklists";
+$lang['edit']['delimiter_action'] = "Delimiter Aktion verändern";
+$lang['edit']['syncjobs'] = "Sync job hinzufügen oder anpassen";
+$lang['edit']['eas_reset'] = "ActiveSync Geräte-Cache zurücksetzen";
+$lang['edit']['spam_alias'] = "Anpassen temporärer Alias-Adressen";
+
+$lang['danger']['img_tmp_missing'] = "Grafik konnte nicht validiert werden: Erstellung temporärer Datei fehlgeschlagen";
+$lang['danger']['img_invalid'] = "Grafik konnte nicht validiert werden";
+$lang['danger']['invalid_mime_type'] = "Grafik konnte nicht validiert werden: Ungültiger MIME-Type";
+$lang['success']['upload_success'] = "Datei wurde erfolgreich hochgeladen";
+$lang['success']['app_links'] = "Änderungen an App Links wurden gespeichert";
+$lang['success']['ui_texts'] = "Änderungen an UI-Texten";
+$lang['success']['reset_main_logo'] = "Standardgrafik wurde wiederhergestellt";
+$lang['success']['items_released'] = "Ausgewählte Objekte wurden an Mailbox versendet";
+$lang['danger']['imagick_exception'] = "Fataler Bildverarbeitungsfehler";
+
+$lang['quarantaine']['quarantaine'] = "Quarantäne";
+$lang['quarantaine']['qinfo'] = "Das Quarantänesystem speichert abgelehnte Nachrichten in der Datenbank. Dem Sender wird <em>nicht</em> signalisiert, dass seine E-Mail zugestellt wurde.<br />
+  E-Mails mit einer maximalen Größe von 10 MiB werden gespeichert.";
+$lang['quarantaine']['release'] = "Freigeben";
+$lang['quarantaine']['empty'] = 'Keine Einträge';
+$lang['quarantaine']['toggle_all'] = 'Alle auswählen';
+$lang['quarantaine']['quick_actions'] = 'Aktionen';
+$lang['quarantaine']['remove'] = 'Entfernen';
+$lang['quarantaine']['received'] = "Empfangen";
+$lang['quarantaine']['action'] = "Aktion";
+$lang['quarantaine']['rcpt'] = "Empfänger";
+$lang['quarantaine']['qid'] = "Rspamd QID";
+$lang['quarantaine']['sender'] = "Sender";
+$lang['quarantaine']['show_item'] = "Details";
+$lang['quarantaine']['check_hash'] = "Checksumme auf VirusTotal suchen";
+$lang['quarantaine']['qitem'] = "Quarantäneeintrag";
+$lang['quarantaine']['subj'] = "Betreff";
+$lang['quarantaine']['text_plain_content'] = "Inhalt (text/plain)";
+$lang['quarantaine']['atts'] = "Anhänge";
+
+$lang['header']['quarantaine'] = "Quarantäne";
+$lang['header']['debug'] = "Debugging";
+
+$lang['quarantaine']['release_body'] = "Die ursprüngliche Nachricht wurde als EML-Datei im Anhang hinterlegt.";
+$lang['danger']['release_send_failed'] = "Die Nachricht konnte nicht versendet werden: %s";
+$lang['quarantaine']['release_subject'] = "Potentiell schädliche Nachricht aus Quarantäne: %s";
+
+$lang['mailbox']['bcc_map_type'] = "BCC Typ";
+$lang['mailbox']['bcc_type'] = "BCC Typ";
+$lang['mailbox']['bcc_sender_map'] = "Senderabhängig";
+$lang['mailbox']['bcc_rcpt_map'] = "Empfängerabhängig";
+$lang['mailbox']['bcc_local_dest'] = "Lokales Ziel";
+$lang['mailbox']['bcc_destinations'] = "BCC Ziel(e)";
+
+$lang['mailbox']['bcc'] = "BCC";
+$lang['mailbox']['bcc_maps'] = "BCC-Maps";
+$lang['mailbox']['bcc_to_sender'] = "Map senderabhängig verwenden";
+$lang['mailbox']['bcc_to_rcpt'] = "Map empfängerabhängig verwenden";
+$lang['mailbox']['add_bcc_entry'] = "BCC-Eintrag hinzufügen";
+$lang['mailbox']['bcc_info'] = "Eine empfängerabhängige Map wird verwendet, wenn die BCC-Map Eintragung auf den Eingang einer E-Mail auf das lokale Ziel reagieren soll. Senderabhängige Maps verfahren nach dem gleichen Prinzip.<br/>
+  Das lokale Ziel wird bei Fehlzustellungen an ein BCC-Ziel nicht informiert.";

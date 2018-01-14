@@ -1,4 +1,15 @@
 $(document).ready(function() {
+  function is_active(elem) {
+    if ($(elem).data('submitted') == '1') {
+      return true;
+    } else {
+      $(elem).text(loading_text);
+      $(elem).attr('data-submitted', '1');
+      function disableF5(e) { if ((e.which || e.keyCode) == 116 || (e.which || e.keyCode) == 82) e.preventDefault(); };
+      $(document).on("keydown", disableF5);
+      return false;
+    }
+  }
   $.fn.serializeObject = function() {
     var o = {};
     var a = this.serializeArray();
@@ -61,6 +72,11 @@ $(document).ready(function() {
     var id = $(this).data('id');
     var api_url = $(this).data('api-url');
     var api_attr = $(this).data('api-attr');
+    if (typeof $(this).data('api-reload-window') !== 'undefined') {
+      api_reload_window = $(this).data('api-reload-window');
+    } else {
+      api_reload_window = true;
+    }
     // If clicked element #edit_selected is in a form with the same data-id as the button,
     // we merge all input fields by {"name":"value"} into api-attr
     if ($(this).closest("form").data('id') == id) {
@@ -74,6 +90,21 @@ $(document).ready(function() {
             $(this).removeClass('inputMissingAttr');
           }
         }
+        if ($(this).attr("max")) {
+          if (Number($(this).val()) > Number($(this).attr("max"))) {
+            invalid = true;
+            $(this).addClass('inputMissingAttr');
+          } else {
+            if ($(this).attr("min")) {
+              if (Number($(this).val()) < Number($(this).attr("min"))) {
+                invalid = true;
+                $(this).addClass('inputMissingAttr');
+              } else {
+                $(this).removeClass('inputMissingAttr');
+              }
+            }
+          }
+        }
       });
       if (!req_empty) {
         var attr_to_merge = $(this).closest("form").serializeObject();
@@ -82,6 +113,7 @@ $(document).ready(function() {
         return false;
       }
     }
+    // alert(JSON.stringify(api_attr));
     // If clicked element #edit_selected has data-item attribute, it is added to "items"
     if (typeof $(this).data('item') !== 'undefined') {
       var id = $(this).data('id');
@@ -94,6 +126,7 @@ $(document).ready(function() {
     api_items = multi_data[id];
     // alert(JSON.stringify(api_attr));
     if (Object.keys(api_items).length !== 0) {
+      if (is_active($(this))) { return false; }
       $.ajax({
         type: "POST",
         dataType: "json",
@@ -106,10 +139,12 @@ $(document).ready(function() {
         jsonp: false,
         complete: function(data) {
           var response = (data.responseText);
-          // alert(response);
-          // console.log(reponse.type);
-          // console.log(reponse.msg);
-          window.location = window.location.href.split("#")[0];
+          if (typeof response !== 'undefined' && response.length !== 0) {
+            response_obj = JSON.parse(response);
+          }
+          if (api_reload_window === true) {
+            window.location = window.location.href.split("#")[0];
+          }
         }
       });
     }
@@ -121,27 +156,49 @@ $(document).ready(function() {
     var id = $(this).data('id');
     var api_url = $(this).data('api-url');
     var api_attr = $(this).data('api-attr');
+    if (typeof $(this).data('api-reload-window') !== 'undefined') {
+      api_reload_window = $(this).data('api-reload-window');
+    } else {
+      api_reload_window = true;
+    }
     // If clicked button is in a form with the same data-id as the button,
     // we merge all input fields by {"name":"value"} into api-attr
     if ($(this).closest("form").data('id') == id) {
-      var req_empty = false;
+      var invalid = false;
       $(this).closest("form").find('select, textarea, input').each(function() {
         if ($(this).prop('required')) {
           if (!$(this).val() && $(this).prop('disabled') === false) {
-            req_empty = true;
+            invalid = true;
             $(this).addClass('inputMissingAttr');
           } else {
             $(this).removeClass('inputMissingAttr');
           }
         }
+        if ($(this).attr("max")) {
+          if (Number($(this).val()) > Number($(this).attr("max"))) {
+            alert($(this).attr("max"))
+            invalid = true;
+            $(this).addClass('inputMissingAttr');
+          } else {
+            if ($(this).attr("min")) {
+              if (Number($(this).val()) < Number($(this).attr("min"))) {
+                invalid = true;
+                $(this).addClass('inputMissingAttr');
+              } else {
+                $(this).removeClass('inputMissingAttr');
+              }
+            }
+          }
+        }
       });
-      if (!req_empty) {
+      if (!invalid) {
         var attr_to_merge = $(this).closest("form").serializeObject();
         var api_attr = $.extend(api_attr, attr_to_merge)
       } else {
         return false;
       }
     }
+    if (is_active($(this))) { return false; }
     // alert(JSON.stringify(api_attr));
     $.ajax({
       type: "POST",
@@ -153,10 +210,20 @@ $(document).ready(function() {
       url: '/api/v1/' + api_url,
       jsonp: false,
       complete: function(data) {
-        // var reponse = (JSON.parse(data.responseText));
-        // console.log(reponse.type);
-        // console.log(reponse.msg);
-        window.location = window.location.href.split("#")[0];
+        var response = (data.responseText);
+        if (typeof response !== 'undefined' && response.length !== 0) {
+          response_obj = JSON.parse(response);
+          if (response_obj.type == 'success') {
+            $('form').formcache('clear');
+          }
+          else {
+            var add_modal = $('.modal.in').attr('id');
+            localStorage.setItem("add_modal", add_modal);
+          }
+        }
+        if (api_reload_window === true) {
+          window.location = window.location.href.split("#")[0];
+        }
       }
     });
   });

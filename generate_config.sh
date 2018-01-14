@@ -13,7 +13,7 @@ if [[ -f mailcow.conf ]]; then
 fi
 
 if [ -z "$MAILCOW_HOSTNAME" ]; then
-  read -p "Hostname (FQDN): " -ei "mx.example.org" MAILCOW_HOSTNAME
+  read -p "Hostname (FQDN - example.org is not a valid FQDN): " -ei "mx.example.org" MAILCOW_HOSTNAME
 fi
 
 if [[ -a /etc/timezone ]]; then
@@ -100,6 +100,8 @@ SKIP_CLAMD=n
 USE_WATCHDOG=n
 # Send notifications by mail (no DKIM signature, sent from watchdog@MAILCOW_HOSTNAME)
 #WATCHDOG_NOTIFY_EMAIL=
+
+LOG_LINES=9999
 
 EOF
 
