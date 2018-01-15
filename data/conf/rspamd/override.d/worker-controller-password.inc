@@ -1,1 +1,1 @@
-# Placeholder
+enable_password = "$2$kd7woydkiz6xxi7jth767395b5fdum56$pusiyqbypsa7yxgtncdcymmzg3pampkkf3qe3abgsdoqdx8quyzy";

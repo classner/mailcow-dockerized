@@ -409,7 +409,7 @@ services:
         - TZ=${TZ}
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock:ro
-        - ./data/conf/rspamd/override.d/worker-controller-password.inc:~/.docker_volumes/mailcow/access.inc:rw
+        - ./data/conf/rspamd/override.d/worker-controller-password.inc:/access.inc:rw
       networks:
         mailcow-network:
           aliases:
