@@ -25,6 +25,11 @@ function api_log($postarray) {
     }
     if ($value = json_decode($value, true)) {
       unset($value["csrf_token"]);
+      foreach ($value as $key => &$val) {
+        if(preg_match("/pass/i", $key)) {
+          $val = '********';
+        }
+      }
       $value = json_encode($value);
     }
     $data_var[] = $data . "='" . $value . "'";
@@ -590,6 +595,39 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               ));
             }
           break;
+          case "recipient_map":
+            if (isset($_POST['attr'])) {
+              $attr = (array)json_decode($_POST['attr'], true);
+              if (recipient_map('add', $attr) === false) {
+                if (isset($_SESSION['return'])) {
+                  echo json_encode($_SESSION['return']);
+                }
+                else {
+                  echo json_encode(array(
+                    'type' => 'error',
+                    'msg' => 'Cannot add item'
+                  ));
+                }
+              }
+              else {
+                if (isset($_SESSION['return'])) {
+                  echo json_encode($_SESSION['return']);
+                }
+                else {
+                  echo json_encode(array(
+                    'type' => 'success',
+                    'msg' => 'Task completed'
+                  ));
+                }
+              }
+            }
+            else {
+              echo json_encode(array(
+                'type' => 'error',
+                'msg' => 'Cannot find attributes in post data'
+              ));
+            }
+          break;
         }
       break;
       case "get":
@@ -842,14 +880,14 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
                   echo '{}';
                 }
               break;
-              case "fail2ban":
+              case "netfilter":
                 // 0 is first record, so empty is fine
                 if (isset($extra)) {
                   $extra = preg_replace('/[^\d\-]/i', '', $extra);
-                  $logs = get_logs('fail2ban-mailcow', $extra);
+                  $logs = get_logs('netfilter-mailcow', $extra);
                 }
                 else {
-                  $logs = get_logs('fail2ban-mailcow');
+                  $logs = get_logs('netfilter-mailcow');
                 }
                 if (isset($logs) && !empty($logs)) {
                   echo json_encode($logs, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -1186,6 +1224,41 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               break;
             }
           break;
+          case "recipient_map":
+            switch ($object) {
+              case "all":
+                $recipient_map_items = recipient_map('get');
+                if (!empty($recipient_map_items)) {
+                  foreach ($recipient_map_items as $recipient_map_item) {
+                    if ($details = recipient_map('details', $recipient_map_item)) {
+                      $data[] = $details;
+                    }
+                    else {
+                      continue;
+                    }
+                  }
+                }
+                if (!isset($data) || empty($data)) {
+                  echo '{}';
+                }
+                else {
+                  echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                }
+              break;
+              default:
+                $data = recipient_map('details', $object);
+                if (!empty($data)) {
+                  $data[] = $details;
+                }
+                if (!isset($data) || empty($data)) {
+                  echo '{}';
+                }
+                else {
+                  echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                }
+              break;
+            }
+          break;
           case "policy_wl_mailbox":
             switch ($object) {
               default:
@@ -1313,11 +1386,11 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               break;
             }
           break;
-          case "quarantaine":
+          case "quarantine":
             // "all" will not print details
             switch ($object) {
               case "all":
-                $data = quarantaine('get');
+                $data = quarantine('get');
                 if (!isset($data) || empty($data)) {
                   echo '{}';
                 }
@@ -1326,7 +1399,7 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
                 }
               break;
               default:
-                $data = quarantaine('details', $object);
+                $data = quarantine('details', $object);
                 if (!isset($data) || empty($data)) {
                   echo '{}';
                 }
@@ -1448,10 +1521,13 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
           case "u2f-registration":
             header('Content-Type: application/javascript');
             if (($_SESSION["mailcow_cc_role"] == "admin" || $_SESSION["mailcow_cc_role"] == "domainadmin") && $_SESSION["mailcow_cc_username"] == $object) {
-              $data = $u2f->getRegisterData(get_u2f_registrations($object));
-              list($req, $sigs) = $data;
+              list($req, $sigs) = $u2f->getRegisterData(get_u2f_registrations($object));
               $_SESSION['regReq'] = json_encode($req);
-              echo 'var req = ' . json_encode($req) . '; var sigs = ' . json_encode($sigs) . ';';
+              $_SESSION['regSigs'] = json_encode($sigs);
+              echo 'var req = ' . json_encode($req) . ';';
+              echo 'var registeredKeys = ' . json_encode($sigs) . ';';
+              echo 'var appId = req.appId;';
+              echo 'var registerRequests = [{version: req.version, challenge: req.challenge}];';
             }
             else {
               return;
@@ -1460,9 +1536,19 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
           case "u2f-authentication":
             header('Content-Type: application/javascript');
             if (isset($_SESSION['pending_mailcow_cc_username']) && $_SESSION['pending_mailcow_cc_username'] == $object) {
-              $reqs = json_encode($u2f->getAuthenticateData(get_u2f_registrations($object)));
-              $_SESSION['authReq']  = $reqs;
-              echo 'var req = ' . $reqs . ';';
+              $auth_data = $u2f->getAuthenticateData(get_u2f_registrations($object));
+              $challenge = $auth_data[0]->challenge;
+              $appId = $auth_data[0]->appId;
+              foreach ($auth_data as $each) {
+                $key = array(); // Empty array
+                $key['version']   = $each->version;
+                $key['keyHandle'] = $each->keyHandle;
+                $registeredKey[]  = $key;
+              }
+              $_SESSION['authReq']  = json_encode($auth_data);
+              echo 'var appId = "' . $appId . '";';
+              echo 'var challenge = ' . json_encode($challenge) . ';';
+              echo 'var registeredKeys = ' . json_encode($registeredKey) . ';';
             }
             else {
               return;
@@ -1643,7 +1729,7 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
             if (isset($_POST['items'])) {
               $items = (array)json_decode($_POST['items'], true);
               if (is_array($items)) {
-                if (quarantaine('delete', array('id' => $items)) === false) {
+                if (quarantine('delete', array('id' => $items)) === false) {
                   if (isset($_SESSION['return'])) {
                     echo json_encode($_SESSION['return']);
                   }
@@ -1685,6 +1771,47 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               $items = (array)json_decode($_POST['items'], true);
               if (is_array($items)) {
                 if (bcc('delete', array('id' => $items)) === false) {
+                  if (isset($_SESSION['return'])) {
+                    echo json_encode($_SESSION['return']);
+                  }
+                  else {
+                    echo json_encode(array(
+                      'type' => 'error',
+                      'msg' => 'Deletion of items/s failed'
+                    ));
+                  }
+                }
+                else {
+                  if (isset($_SESSION['return'])) {
+                    echo json_encode($_SESSION['return']);
+                  }
+                  else {
+                    echo json_encode(array(
+                      'type' => 'success',
+                      'msg' => 'Task completed'
+                    ));
+                  }
+                }
+              }
+              else {
+                echo json_encode(array(
+                  'type' => 'error',
+                  'msg' => 'Cannot find id array in post data'
+                ));
+              }
+            }
+            else {
+              echo json_encode(array(
+                'type' => 'error',
+                'msg' => 'Cannot find items in post data'
+              ));
+            }
+          break;
+          case "recipient_map":
+            if (isset($_POST['items'])) {
+              $items = (array)json_decode($_POST['items'], true);
+              if (is_array($items)) {
+                if (recipient_map('delete', array('id' => $items)) === false) {
                   if (isset($_SESSION['return'])) {
                     echo json_encode($_SESSION['return']);
                   }
@@ -2220,6 +2347,50 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               ));
             }
           break;
+          case "recipient_map":
+            if (isset($_POST['items']) && isset($_POST['attr'])) {
+              $items = (array)json_decode($_POST['items'], true);
+              $attr = (array)json_decode($_POST['attr'], true);
+              $postarray = array_merge(array('id' => $items), $attr);
+              if (is_array($postarray['id'])) {
+                if (recipient_map('edit', $postarray) === false) {
+                  if (isset($_SESSION['return'])) {
+                    echo json_encode($_SESSION['return']);
+                  }
+                  else {
+                    echo json_encode(array(
+                      'type' => 'error',
+                      'msg' => 'Edit failed'
+                    ));
+                  }
+                  exit();
+                }
+                else {
+                  if (isset($_SESSION['return'])) {
+                    echo json_encode($_SESSION['return']);
+                  }
+                  else {
+                    echo json_encode(array(
+                      'type' => 'success',
+                      'msg' => 'Task completed'
+                    ));
+                  }
+                }
+              }
+              else {
+                echo json_encode(array(
+                  'type' => 'error',
+                  'msg' => 'Incomplete post data'
+                ));
+              }
+            }
+            else {
+              echo json_encode(array(
+                'type' => 'error',
+                'msg' => 'Incomplete post data'
+              ));
+            }
+          break;
           case "alias":
             if (isset($_POST['items']) && isset($_POST['attr'])) {
               $items = (array)json_decode($_POST['items'], true);
@@ -2444,7 +2615,7 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               $attr = (array)json_decode($_POST['attr'], true);
               $postarray = array_merge(array('id' => $items), $attr);
               if (is_array($postarray['id'])) {
-                if (quarantaine('edit', $postarray) === false) {
+                if (quarantine('edit', $postarray) === false) {
                   if (isset($_SESSION['return'])) {
                     echo json_encode($_SESSION['return']);
                   }
@@ -2482,11 +2653,11 @@ if (isset($_SESSION['mailcow_cc_role']) || isset($_SESSION['pending_mailcow_cc_u
               ));
             }
           break;
-          case "quarantaine":
+          case "quarantine":
             // Edit settings, does not need IDs
             if (isset($_POST['attr'])) {
               $postarray = json_decode($_POST['attr'], true);
-              if (quarantaine('edit', $postarray) === false) {
+              if (quarantine('edit', $postarray) === false) {
                 if (isset($_SESSION['return'])) {
                   echo json_encode($_SESSION['return']);
                 }

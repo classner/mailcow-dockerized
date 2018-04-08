@@ -22,7 +22,9 @@ function setLang(sel) {
   $.post( "<?= $_SERVER['REQUEST_URI']; ?>", {lang: sel} );
   window.location.href = window.location.pathname + window.location.search;
 }
-
+$(window).load(function() {
+  $(".overlay").hide();
+});
 $(document).ready(function() {
   window.mailcow_alert_box = function(message, type) {
     msg = $('<span/>').html(message).text();
@@ -59,7 +61,7 @@ $(document).ready(function() {
           type: "GET",
           cache: false,
           dataType: 'script',
-          url: "/api/v1/get/u2f-authentication/<?= (isset($_SESSION['pending_mailcow_cc_username'])) ? $_SESSION['pending_mailcow_cc_username'] : null; ?>",
+          url: "/api/v1/get/u2f-authentication/<?= (isset($_SESSION['pending_mailcow_cc_username'])) ? rawurlencode($_SESSION['pending_mailcow_cc_username']) : null; ?>",
           complete: function(data){
             $('#u2f_status_auth').html('<?=$lang['tfa']['waiting_usb_auth'];?>');
             data;
@@ -76,6 +78,17 @@ $(document).ready(function() {
           }
         });
       }
+  });
+  $('#ConfirmTFAModal').on('hidden.bs.modal', function(){
+      $.ajax({
+        type: "GET",
+        cache: false,
+        dataType: 'script',
+        url: '/inc/ajax/destroy_tfa_auth.php',
+        complete: function(data){
+          window.location = window.location.href.split("#")[0];
+        }
+      });
   });
   <?php endif; ?>
 
@@ -98,7 +111,7 @@ $(document).ready(function() {
         type: "GET",
         cache: false,
         dataType: 'script',
-        url: "/api/v1/get/u2f-registration/<?= (isset($_SESSION['mailcow_cc_username'])) ? $_SESSION['mailcow_cc_username'] : null; ?>",
+        url: "/api/v1/get/u2f-registration/<?= (isset($_SESSION['mailcow_cc_username'])) ? rawurlencode($_SESSION['mailcow_cc_username']) : null; ?>",
         complete: function(data){
           data;
           setTimeout(function() {
@@ -186,6 +199,7 @@ $(document).ready(function() {
       $(this).prop("disabled",true);
       $(this).html('<span class="glyphicon glyphicon-refresh glyphicon-spin"></span> ');
       $('#statusTriggerRestartContainer').text('Restarting container, this may take a while... ');
+      $('#statusTriggerRestartContainer2').text('Reloading webpage... ');
       $.ajax({
         method: 'get',
         url: '/inc/ajax/container_ctrl.php',
@@ -200,6 +214,9 @@ $(document).ready(function() {
         success: function(data) {
           $('#statusTriggerRestartContainer').append(data);
           $('#triggerRestartContainer').html('<span class="glyphicon glyphicon-ok"></span> ');
+          $('#statusTriggerRestartContainer2').append(data);
+          $('#triggerRestartContainer').html('<span class="glyphicon glyphicon-ok"></span> ');
+          window.location = window.location.href.split("#")[0];
         }
       });
     });

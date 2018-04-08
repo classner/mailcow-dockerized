@@ -191,6 +191,7 @@ phpfpm_checks() {
     host_ip=$(get_container_ip php-fpm-mailcow)
     err_c_cur=${err_count}
     cgi-fcgi -bind -connect ${host_ip}:9000 | grep "Content-type" 1>&2; err_count=$(( ${err_count} + ($? * 2)))
+    cgi-fcgi -bind -connect ${host_ip}:9001 | grep "Content-type" 1>&2; err_count=$(( ${err_count} + ($? * 2)))
     /usr/lib/nagios/plugins/check_ping -4 -H ${host_ip} -w 2000,10% -c 4000,100% -p2 1>&2; err_count=$(( ${err_count} + $? ))
     [ ${err_c_cur} -eq ${err_count} ] && [ ! $((${err_count} - 1)) -lt 0 ] && err_count=$((${err_count} - 1)) diff_c=1
     [ ${err_c_cur} -ne ${err_count} ] && diff_c=$(( ${err_c_cur} - ${err_count} ))
@@ -210,7 +211,7 @@ rspamd_checks() {
   while [ ${err_count} -lt ${THRESHOLD} ]; do
     host_ip=$(get_container_ip rspamd-mailcow)
     err_c_cur=${err_count}
-    SCORE=$(curl --silent ${host_ip}:11333/scan -d '
+    SCORE=$(/usr/bin/curl -s --data-binary @- --unix-socket /rspamd-sock/rspamd.sock http://rspamd/scan -d '
 To: null@localhost
 From: watchdog@localhost
 

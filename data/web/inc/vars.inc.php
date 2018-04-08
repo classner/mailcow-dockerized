@@ -76,7 +76,7 @@ $DETECT_LANGUAGE = true;
 $DEFAULT_LANG = 'de';
 
 // Available languages
-$AVAILABLE_LANGUAGES = array('de', 'en', 'es', 'fr', 'nl', 'pl', 'pt', 'ru', 'it');
+$AVAILABLE_LANGUAGES = array('de', 'en', 'es', 'fr', 'nl', 'pl', 'pt', 'ru', 'it', 'ca');
 
 // Change theme (default: lumen)
 // Needs to be one of those: cerulean, cosmo, cyborg, darkly, flatly, journal, lumen, paper, readable, sandstone,
@@ -100,7 +100,7 @@ $MAILCOW_APPS = array(
 );
 
 // Rows until pagination begins
-$PAGINATION_SIZE = 10;
+$PAGINATION_SIZE = 20;
 
 // Default number of rows/lines to display (log table)
 $LOG_LINES = 100;
@@ -116,7 +116,3 @@ $OTP_LABEL = "mailcow UI";
 
 // Default "to" address in relay test tool
 $RELAY_TO = "null@hosted.mailcow.de";
-
-// Quarantaine data age in days to keep
-$QUARANTAINE_AGE = 10;
-
