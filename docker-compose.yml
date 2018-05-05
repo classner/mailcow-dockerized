@@ -81,9 +81,10 @@ services:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
 
-      image: mailcow/clamd:1.9
+      image: mailcow/clamd:1.11
       build: ./data/Dockerfiles/clamd
       restart: always
+      tty: true
       environment:
         - TZ=${TZ}
         - SKIP_CLAMD=${SKIP_CLAMD:-n}
@@ -131,7 +132,7 @@ services:
         options:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
-      image: mailcow/phpfpm:1.12
+      image: mailcow/phpfpm:1.14
       build: ./data/Dockerfiles/phpfpm
       command: "php-fpm -d date.timezone=${TZ} -d expose_php=0"
       depends_on:
@@ -141,8 +142,7 @@ services:
         - ./data/conf/rspamd/dynmaps:/dynmaps:ro
         - ~/.docker_volumes/mailcow/rspamd-sock:/rspamd-sock
         - ./data/conf/rspamd/meta_exporter:/meta_exporter:ro
-        - ./data/conf/phpfpm/php-fpm.d/www.conf:/usr/local/etc/php-fpm.d/www.conf
-        - ./data/conf/phpfpm/php-fpm.d/system.conf:/usr/local/etc/php-fpm.d/system.conf
+        - ./data/conf/phpfpm/php-fpm.d/pools.conf:/usr/local/etc/php-fpm.d/z-pools.conf
         - ./data/conf/phpfpm/php-conf.d/opcache-recommended.ini:/usr/local/etc/php/conf.d/opcache-recommended.ini
         - ./data/conf/phpfpm/php-conf.d/upload.ini:/usr/local/etc/php/conf.d/upload.ini
       environment:
@@ -177,7 +177,7 @@ services:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
           
-      image: mailcow/sogo:1.20
+      image: mailcow/sogo:1.21
       build: ./data/Dockerfiles/sogo
       environment:
         - DBNAME=${DBNAME}
@@ -206,7 +206,7 @@ services:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
           
-      image: mailcow/dovecot:1.24
+      image: mailcow/dovecot:1.25
       build: ./data/Dockerfiles/dovecot
       cap_add:
         - NET_BIND_SERVICE
@@ -253,12 +253,12 @@ services:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
           
-      image: mailcow/postfix:1.14
+      image: mailcow/postfix:1.15
       build: ./data/Dockerfiles/postfix
       volumes:
         - ./data/conf/postfix:/opt/postfix/conf
         - ./data/assets/ssl:/etc/ssl/mail/:ro
-        - ~/.docker_volumes/mailcow/postfix:/opt/postfix/conf
+        - ~/.docker_volumes/mailcow/postfix:/var/spool/postfix
         - ~/.docker_volumes/mailcow/crypt:/var/lib/zeyple
       environment:
         - LOG_LINES=${LOG_LINES:-9999}
@@ -387,7 +387,7 @@ services:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
 
-      image: mailcow/netfilter:1.11
+      image: mailcow/netfilter:1.13
       build: ./data/Dockerfiles/netfilter
       stop_grace_period: 30s
       depends_on:
@@ -414,7 +414,7 @@ services:
         options:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
-      image: mailcow/watchdog:1.14
+      image: mailcow/watchdog:1.15
       # Debug
       #command: /watchdog.sh
       build: ./data/Dockerfiles/watchdog
@@ -445,7 +445,7 @@ services:
         options:
           gelf-address: "udp://localhost:12201"
           tag: "mailcow"
-      image: mailcow/dockerapi:1.9
+      image: mailcow/dockerapi:1.11
       restart: always
       build: ./data/Dockerfiles/dockerapi
       sysctls:
